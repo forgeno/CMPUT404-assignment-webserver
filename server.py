@@ -61,7 +61,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             webpageFile = open("www/notFound.html")
             payload = webpageFile.read()
             # payload = "<h1>File: {}.{} does exist! </h2>".format(requestFile[0],requestFile[1])
-            full_payload = header + payload
+            full_payload = header + payload #test
 
             
         #print ("Got a request of: %s\n" % self.data)
