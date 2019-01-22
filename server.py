@@ -27,41 +27,64 @@ import os
 
 # try: curl -v -X GET http://127.0.0.1:8080/
 
-
+OS_PATH = os.path.dirname(os.path.abspath(__file__))
 class MyWebServer(socketserver.BaseRequestHandler):
     
     def handle(self):
         allowedRequests = ['GET']
         full_payload = ""
+        payload = ""
+        header = ""
+        webpageFile = None
+        requestFile = ""
         self.data = self.request.recv(1024).strip()
-        requestList = str(self.data).split("/")
-        requestFile = requestList[1].split(" ")[0].split(".")
-        requestType = requestList[0].strip()[2:]
-        print(requestType)
-        # print(os.path.isfile("www/"+requestFile))
-        try:
-            #print("Detected html GET request")
-            if(requestType in allowedRequests):
-                webpageFile = open("www/"+requestFile[0]+"."+requestFile[1])
-                if(requestFile[1] == "html"):
-                    header = "HTTP/1.0 200 OK\nContent-Type: text/html\n\n"
-                elif(requestFile[1] == "css"):
-                    header = "HTTP/1.0 200 OK\nContent-Type: text/css\n\n"
-                payload = webpageFile.read()
-                full_payload = header + payload
-                print("file found: "+requestFile[0]+"."+requestFile[1])
-            else:
-                header = '405 Method Not Allowed\r\nContent-Type: text/html\n\n'
-                webpageFile = open("www/notAllowed.html")
-                full_payload = header
+        requestList = str(self.data).split(" ")
+        requestPath = "./www"+requestList[1]
+        requestType = requestList[0][2:]
+        requestFile = requestList[1]
+        requestFileType = ""
+        # print("File: "+requestFile+" Filetype: "+requestFileType+"")
+        # print("requestFile: %s requestPath: %s",requestFile, requestPath)
+        # print(requestList)
+        # try:
+        if(requestType in allowedRequests):
+            try:
+                header = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n"
+                webpageFile = open(requestPath+"index.html")
+            except:
+                try:
+                    requestFileType = requestFile.split(".")[1]
+                    webpageFile = open(requestPath)
+                    if("css" == requestFileType):
+                        header = "HTTP/1.1 200 OK\nContent-Type: text/css\n\n"
+                        
+                    if("html" == requestFileType):
+                        header = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n"
+                    
+                except:
+                    print("File: "+str(self.data)+" not found!")
+                    header = 'HTTP/1.1 404 Not Found\r\n'
+                    webpageFile = open("www/notFound.html") 
 
-        except:
-            #print("file not found: "+requestFile[0]+"."+requestFile[1])
-            header = 'HTTP/1.0 404 Not Found\r\n'
-            webpageFile = open("www/notFound.html")
-            payload = webpageFile.read()
-            # payload = "<h1>File: {}.{} does exist! </h2>".format(requestFile[0],requestFile[1])
-            full_payload = header + payload #test
+            try:
+                payload = webpageFile.read()      
+            except:
+                payload = webpageFile                                             
+            full_payload = header + payload
+
+        else:
+            header = '405 Method Not Allowed\r\nContent-Type: text/html\n\n'
+            webpageFile = open(requestPath+"/notAllowed.html")
+            full_payload = header
+
+        #  Exception as e: 
+        #     print(e)
+        #     print("file not found: "+requestFile[0]+"."+requestFile[1])
+        #     header = 'HTTP/1.1 404 Not Found\r\n'
+        #     webpageFile = open(requestFile+"/notFound.html")
+        #     payload = webpageFile.read()
+        #     payload = "<h1>File: {}.{} does exisexceptt! </h2>".format(requestFile[0],requestFile[1])
+        #     full_payload = header + payload #test
 
             
         #print ("Got a request of: %s\n" % self.data)
