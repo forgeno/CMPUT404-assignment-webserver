@@ -1,5 +1,6 @@
 #  coding: utf-8 
 import socketserver
+import os
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 # 
@@ -30,9 +31,42 @@ import socketserver
 class MyWebServer(socketserver.BaseRequestHandler):
     
     def handle(self):
+        allowedRequests = ['GET']
+        full_payload = ""
         self.data = self.request.recv(1024).strip()
-        print ("Got a request of: %s\n" % self.data)
-        self.request.sendall(bytearray("OK",'utf-8'))
+        requestList = str(self.data).split("/")
+        requestFile = requestList[1].split(" ")[0].split(".")
+        requestType = requestList[0].strip()[2:]
+        print(requestType)
+        # print(os.path.isfile("www/"+requestFile))
+        try:
+            #print("Detected html GET request")
+            if(requestType in allowedRequests):
+                webpageFile = open("www/"+requestFile[0]+"."+requestFile[1])
+                if(requestFile[1] == "html"):
+                    header = "HTTP/1.0 200 OK\nContent-Type: text/html\n\n"
+                elif(requestFile[1] == "css"):
+                    header = "HTTP/1.0 200 OK\nContent-Type: text/css\n\n"
+                payload = webpageFile.read()
+                full_payload = header + payload
+                print("file found: "+requestFile[0]+"."+requestFile[1])
+            else:
+                header = '405 Method Not Allowed\r\nContent-Type: text/html\n\n'
+                webpageFile = open("www/notAllowed.html")
+                full_payload = header
+
+        except:
+            #print("file not found: "+requestFile[0]+"."+requestFile[1])
+            header = 'HTTP/1.0 404 Not Found\r\n'
+            webpageFile = open("www/notFound.html")
+            payload = webpageFile.read()
+            # payload = "<h1>File: {}.{} does exist! </h2>".format(requestFile[0],requestFile[1])
+            full_payload = header + payload
+
+            
+        #print ("Got a request of: %s\n" % self.data)
+        self.request.sendall(full_payload.encode())
+
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
