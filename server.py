@@ -44,15 +44,19 @@ class MyWebServer(socketserver.BaseRequestHandler):
         webpageFile = None
         requestFile = ""
         requestPath = ""
+        requestType = ""
+        requestFileType = ""
         self.data = self.request.recv(1024).strip()
         requestList = str(self.data).split(" ")
         #print("requestList: "+str(requestList))
         absPath = os.getcwd()
-        requestPath = absPath+"/www"+requestList[1]
-        requestType = requestList[0][2:]
-        requestFile = requestList[1]
-        requestFileType = ""
-        #print("abs path: "+str(requestPath))
+        try:
+            requestPath = absPath+"/www"+requestList[1]
+            requestType = requestList[0][2:]
+            requestFile = requestList[1]
+        except:
+            print("Error: Recieved 0Byte request, return null")
+        print("abs path: "+str(requestPath))
         #print("current WD: "+str(absPath))
         if(requestType in allowedRequests):
             try:
