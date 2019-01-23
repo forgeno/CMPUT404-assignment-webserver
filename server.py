@@ -88,7 +88,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
                     
                 except:
                     #print("File: "+str(requestFile)+" not found!")
-                    header = 'HTTP/1.1 404 Not Found\r\n'
+                    header = 'HTTP/1.1 404 Not Found\r\nContent-Type: text/html\n\n'
                     webpageFile = open("www/notFound.html") 
             #print("HTML_DIR: "+str(HTML_DIR))
             try:
@@ -98,7 +98,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
             full_payload = header + payload
 
         else:
-            header = '405 Method Not Allowed\r\nContent-Type: text/html\n\n'
+            header = 'HTTP/1.1 405 Method Not Allowed\r\nContent-Type: text/html\n\n'
             webpageFile = open(requestPath+"/notAllowed.html")
             full_payload = header
 
