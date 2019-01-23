@@ -1,5 +1,6 @@
 #  coding: utf-8 
 import socketserver
+import inspect
 import os
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
@@ -32,8 +33,10 @@ import os
 
 OS_PATH = os.path.dirname(os.path.abspath(__file__))
 class MyWebServer(socketserver.BaseRequestHandler):
-    
+
+    HTML_DIR = ""
     def handle(self):
+        global HTML_DIR
         allowedRequests = ['GET']
         full_payload = ""
         payload = ""
@@ -53,27 +56,41 @@ class MyWebServer(socketserver.BaseRequestHandler):
         #print("current WD: "+str(absPath))
         if(requestType in allowedRequests):
             try:
-                header = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n"
-                webpageFile = open(requestPath+"index.html")
+                if(requestPath[-1:] == "/"):
+                    header = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n"
+                    webpageFile = open(requestPath+"index.html")
+                else:
+                    header = "HTTP/1.1 301 Moved Permanently\nContent-Type: text/html\n\n"
+                    webpageFile = open(requestPath+"/index.html")
+                    HTML_DIR = requestFile
             except:
                 try:
-                    webpageFile = open(requestPath)
+                    try:
+                        webpageFile = open(requestPath)
+                        HTML_DIR = ""
+                        #print("RESET GLOBAL HTML VAR")
+                    except:
+                        requestPath = absPath+"/www"+HTML_DIR+requestList[1]
+                        #print("Tried to open: /"+requestPath)
+                        webpageFile = open("/"+requestPath)
                     absPathConcat = os.path.dirname(os.path.realpath(webpageFile.name))
                     if(absPath in absPathConcat):
                         requestFileType = requestFile.split(".")[1]
                     else:
                         raise Exception("Detected insecure file access!")
+
+                    if("html" == requestFileType):
+                        HTML_DIR = requestFile
+                        header = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n"
+
                     if("css" == requestFileType):
                         header = "HTTP/1.1 200 OK\nContent-Type: text/css\n\n"
-                        
-                    if("html" == requestFileType):
-                        header = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n"
                     
                 except:
                     #print("File: "+str(requestFile)+" not found!")
                     header = 'HTTP/1.1 404 Not Found\r\n'
                     webpageFile = open("www/notFound.html") 
-
+            #print("HTML_DIR: "+str(HTML_DIR))
             try:
                 payload = webpageFile.read()      
             except:
