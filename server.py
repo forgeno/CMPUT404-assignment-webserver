@@ -60,7 +60,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
                     header = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n"
                     webpageFile = open(requestPath+"index.html")
                 else:
-                    header = "HTTP/1.1 301 Moved Permanently\nContent-Type: text/html\n\n"
+                    header = "HTTP/1.1 301 Moved Permanently\nContent-Type: text/html\nLocation: "+requestFile+"/\n\n"
                     webpageFile = open(requestPath+"/index.html")
                     HTML_DIR = requestFile
             except:
