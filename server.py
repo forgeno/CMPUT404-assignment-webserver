@@ -48,7 +48,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
         requestFileType = ""
         self.data = self.request.recv(1024).strip()
         requestList = str(self.data).split(" ")
-        #print("requestList: "+str(requestList))
+        print(self.data)
         absPath = os.getcwd()
         try:
             requestPath = absPath+"/www"+requestList[1]
