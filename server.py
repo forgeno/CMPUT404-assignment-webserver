@@ -48,7 +48,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
         requestFileType = ""
         self.data = self.request.recv(1024).strip()
         requestList = str(self.data).split(" ")
-        #print("requestList: "+str(requestList))
+        print(self.data)
         absPath = os.getcwd()
         try:
             requestPath = absPath+"/www"+requestList[1]
@@ -64,6 +64,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
                     header = "HTTP/1.1 200 OK\nContent-Type: text/html\n\n"
                     webpageFile = open(requestPath+"index.html")
                 else:
+                    print("REDIRECTED TO NEW URL FOR FILE: "+)
                     header = "HTTP/1.1 301 Moved Permanently\nContent-Type: text/html\nLocation: "+requestFile+"/\n\n"
                     webpageFile = open(requestPath+"/index.html")
                     HTML_DIR = requestFile
